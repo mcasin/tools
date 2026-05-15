@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Red</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f1f5f9;
+    --card-bg: #fff;
+    --card-shadow: rgba(0,0,0,.08);
+    --text: #0f172a;
+    --label: #334155;
+    --label-span: #64748b;
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --input-focus-bg: #fff;
+    --btn-bg: #f8fafc;
+    --btn-text: #334155;
+    --btn-border: #e2e8f0;
+    --btn-hover: #93c5fd;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #e2e8f0;
+    --slider-thumb-border: #fff;
+    --range-label: #94a3b8;
+    --results-bg: #f8fafc;
+    --row-border: #e2e8f0;
+    --row-label: #64748b;
+    --row-value: #0f172a;
+    --positive: #16a34a;
+    --disclaimer: #94a3b8;
+    --toggle-bg: #e2e8f0;
+    --toggle-color: #64748b;
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-shadow: rgba(0,0,0,.4);
+    --text: #f1f5f9;
+    --label: #cbd5e1;
+    --label-span: #94a3b8;
+    --input-bg: #334155;
+    --input-border: #475569;
+    --input-focus-bg: #334155;
+    --btn-bg: #334155;
+    --btn-text: #cbd5e1;
+    --btn-border: #475569;
+    --btn-hover: #3b82f6;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #475569;
+    --slider-thumb-border: #1e293b;
+    --range-label: #64748b;
+    --results-bg: #0f172a;
+    --row-border: #334155;
+    --row-label: #94a3b8;
+    --row-value: #f1f5f9;
+    --positive: #4ade80;
+    --disclaimer: #64748b;
+    --toggle-bg: #334155;
+    --toggle-color: #f1f5f9;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
+    transition: background .3s;
+  }
+  .card {
+    background: var(--card-bg); border-radius: 20px; padding: 40px; max-width: 520px; width: 100%;
+    box-shadow: 0 4px 24px var(--card-shadow); transition: background .3s;
+  }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  #themeToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 20px; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #themeToggle:hover { opacity: .8; }
+  .field { margin-bottom: 24px; }
+  label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
+  label span { font-weight: 400; color: var(--label-span); }
+  input[type="text"], input[type="number"] {
+    width: 100%; padding: 12px 14px; font-size: 16px; border: 1.5px solid var(--input-border); border-radius: 10px;
+    background: var(--input-bg); transition: border-color .2s, background .3s; outline: none; color: var(--text);
+  }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accent); background: var(--input-focus-bg); }
+  input[type="number"]::-webkit-inner-spin-button { opacity: .5; }
+  input[readonly] { cursor: default; }
+  label input[type="number"] { width: 52px; padding: 2px 6px; font-size: 14px; text-align: center; display: inline; }
+  .btn-group { display: flex; gap: 8px; }
+  .btn-group button {
+    flex: 1; padding: 10px; font-size: 14px; font-weight: 600; border: 1.5px solid var(--btn-border); border-radius: 10px;
+    background: var(--btn-bg); color: var(--btn-text); cursor: pointer; transition: all .2s;
+  }
+  .btn-group button:hover { border-color: var(--btn-hover); }
+  .btn-group button.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  input[type="range"] {
+    width: 100%; height: 6px; border-radius: 3px; background: var(--slider-track);
+    -webkit-appearance: none; appearance: none; outline: none; margin-top: 4px; transition: background .3s;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: 2px solid var(--slider-thumb-border); box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--accent);
+    cursor: pointer; border: 2px solid var(--slider-thumb-border); box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  }
+  .range-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--range-label); margin-top: 2px; }
+  .results { background: var(--results-bg); border-radius: 12px; padding: 20px; margin-top: 28px; transition: background .3s; }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid var(--row-border); }
+  .row .label { color: var(--row-label); }
+  .row .value { font-weight: 600; color: var(--row-value); }
+  .row.highlight .value { color: var(--positive); font-size: 20px; }
+  .disclaimer { font-size: 12px; color: var(--disclaimer); margin-top: 16px; line-height: 1.5; text-align: left; }
+  .disclaimer strong { color: var(--row-label); }
+  .error { color: #ef4444; font-size: 13px; margin-top: 4px; display: none; }
+  @media (max-width: 480px) { .card { padding: 24px; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1>Calculadora de Red</h1>
+    <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+  </div>
+
+  <div class="field">
+    <label>Dirección IP</label>
+    <input type="text" id="ipAddress" value="192.168.1.0" placeholder="ej. 192.168.1.0" autocomplete="off" spellcheck="false">
+    <div class="error" id="ipError">Dirección IP no válida</div>
+  </div>
+
+  <div class="field">
+    <label>Prefijo CIDR <span><input type="number" id="prefixInput" min="8" max="32" value="24"> <span id="prefixLabel">/24</span></span></label>
+    <input type="range" id="prefix" min="8" max="32" value="24" step="1">
+    <div class="range-labels"><span>/8</span><span>/32</span></div>
+  </div>
+
+  <div class="field">
+    <label>Máscara de subred <span id="maskLabel">255.255.255.0</span></label>
+  </div>
+
+  <div class="results">
+    <div class="row">
+      <span class="label">Dirección de red</span>
+      <span class="value" id="networkAddr">--</span>
+    </div>
+    <div class="row">
+      <span class="label">Primer host utilizable</span>
+      <span class="value" id="firstHost">--</span>
+    </div>
+    <div class="row">
+      <span class="label">Último host utilizable</span>
+      <span class="value" id="lastHost">--</span>
+    </div>
+    <div class="row">
+      <span class="label">Dirección de broadcast</span>
+      <span class="value" id="broadcastAddr">--</span>
+    </div>
+    <div class="row highlight">
+      <span class="label">Hosts utilizables</span>
+      <span class="value" id="usableHosts">--</span>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Rangos privados (RFC 1918):</strong> 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 &nbsp;|&nbsp;
+    <strong>Loopback:</strong> 127.0.0.0/8 &nbsp;|&nbsp;
+    <strong>Link-local:</strong> 169.254.0.0/16<br>
+    Las direcciones públicas son el resto y son enrutables en Internet.
+  </div>
+</div>
+
+<script>
+  const ipEl = document.getElementById('ipAddress');
+  const prefixEl = document.getElementById('prefix');
+  const prefixInput = document.getElementById('prefixInput');
+  const prefixLabel = document.getElementById('prefixLabel');
+  const maskLabel = document.getElementById('maskLabel');
+  const ipError = document.getElementById('ipError');
+  const networkAddr = document.getElementById('networkAddr');
+  const firstHost = document.getElementById('firstHost');
+  const lastHost = document.getElementById('lastHost');
+  const broadcastAddr = document.getElementById('broadcastAddr');
+  const usableHosts = document.getElementById('usableHosts');
+
+  function ipToInt(ip) {
+    const parts = ip.split('.');
+    return ((+parts[0] << 24) | (+parts[1] << 16) | (+parts[2] << 8) | +parts[3]) >>> 0;
+  }
+
+  function intToIp(n) {
+    return [(n >>> 24) & 0xff, (n >>> 16) & 0xff, (n >>> 8) & 0xff, n & 0xff].join('.');
+  }
+
+  function maskFromPrefix(len) {
+    if (len === 0) return 0;
+    return ((~0) << (32 - len)) >>> 0;
+  }
+
+  function isValidIp(ip) {
+    const parts = ip.split('.');
+    if (parts.length !== 4) return false;
+    return parts.every(p => {
+      if (!/^\d+$/.test(p)) return false;
+      const n = parseInt(p, 10);
+      return n >= 0 && n <= 255 && String(n) === p;
+    });
+  }
+
+  function fmtHostCount(n) {
+    return n.toLocaleString('es-ES');
+  }
+
+  function calc() {
+    const ipStr = ipEl.value.trim();
+    const prefix = parseInt(prefixEl.value, 10);
+
+    prefixInput.value = prefix;
+    prefixLabel.textContent = '/' + prefix;
+    maskLabel.textContent = intToIp(maskFromPrefix(prefix));
+
+    if (!isValidIp(ipStr)) {
+      ipError.style.display = 'block';
+      ipEl.style.borderColor = '#ef4444';
+      networkAddr.textContent = '--';
+      firstHost.textContent = '--';
+      lastHost.textContent = '--';
+      broadcastAddr.textContent = '--';
+      usableHosts.textContent = '--';
+      return;
+    }
+
+    ipError.style.display = 'none';
+    ipEl.style.borderColor = '';
+
+    const ip = ipToInt(ipStr);
+    const mask = maskFromPrefix(prefix);
+    const network = ip & mask;
+    const broadcast = network | ((~mask) >>> 0);
+
+    let first, last, count;
+    if (prefix >= 31) {
+      first = network;
+      last = broadcast;
+      count = prefix === 31 ? 2 : 1;
+    } else {
+      first = network + 1;
+      last = broadcast - 1;
+      count = Math.pow(2, 32 - prefix) - 2;
+    }
+
+    networkAddr.textContent = intToIp(network);
+    firstHost.textContent = intToIp(first);
+    lastHost.textContent = intToIp(last);
+    broadcastAddr.textContent = intToIp(broadcast);
+    usableHosts.textContent = fmtHostCount(count);
+  }
+
+  prefixInput.addEventListener('input', () => {
+    let v = parseInt(prefixInput.value, 10);
+    if (isNaN(v)) return;
+    v = Math.min(32, Math.max(8, v));
+    prefixInput.value = v;
+    prefixEl.value = v;
+    calc();
+  });
+
+  [ipEl, prefixEl].forEach(el => el.addEventListener('input', calc));
+  calc();
+
+  const themeToggle = document.getElementById('themeToggle');
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', theme);
+  }
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  });
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    setTheme('dark');
+  }
+</script>
+</body>
+</html>
