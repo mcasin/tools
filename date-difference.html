@@ -87,16 +87,49 @@
     display: flex; align-items: center; justify-content: center;
   }
   #themeToggle:hover { opacity: .8; }
-  .field { margin-bottom: 24px; }
+  .field { margin-bottom: 24px; position: relative; }
   label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
   label span { font-weight: 400; color: var(--label-span); }
   input[type="text"] {
     width: 100%; padding: 12px 14px; font-size: 16px; border: 1.5px solid var(--input-border); border-radius: 10px;
     background: var(--input-bg); transition: border-color .2s, background .3s; outline: none; color: var(--text);
-    font-family: inherit;
+    font-family: inherit; cursor: pointer;
   }
   input[type="text"]:focus { border-color: var(--accent); background: var(--input-focus-bg); }
   .error { color: #ef4444; font-size: 13px; margin-top: 4px; display: none; }
+  .calendar-popup {
+    position: absolute; top: 100%; left: 0; z-index: 10; margin-top: 6px; width: 100%;
+    background: var(--card-bg); border: 1.5px solid var(--input-border); border-radius: 14px;
+    padding: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.15); display: none;
+  }
+  .calendar-popup.open { display: block; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .cal-head button {
+    background: none; border: none; width: 32px; height: 32px; border-radius: 8px;
+    font-size: 16px; cursor: pointer; color: var(--text); transition: .1s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-head button:hover { background: var(--btn-hover); }
+  .cal-selects { display: flex; gap: 4px; align-items: center; }
+  .cal-selects select {
+    padding: 4px 6px; font-size: 13px; font-weight: 600; border: 1px solid var(--input-border); border-radius: 6px;
+    background: var(--input-bg); color: var(--text); cursor: pointer; outline: none; font-family: inherit;
+  }
+  .cal-selects select:focus { border-color: var(--accent); }
+  .cal-selects .cal-month { width: 110px; }
+  .cal-selects .cal-year { width: 70px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-dow {
+    text-align: center; font-size: 11px; font-weight: 600; color: var(--label-span); padding: 4px 0;
+  }
+  .cal-day {
+    text-align: center; padding: 7px 0; font-size: 13px; border-radius: 8px; cursor: pointer;
+    color: var(--text); transition: .1s;
+  }
+  .cal-day:hover { background: var(--btn-hover); }
+  .cal-day.selected { background: var(--accent); color: var(--accent-text); }
+  .cal-day.other { color: var(--label-span); opacity: .4; }
+  .cal-day.today { font-weight: 700; }
   .results { background: var(--results-bg); border-radius: 12px; padding: 20px; margin-top: 28px; transition: background .3s; }
   .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
   .row + .row { border-top: 1px solid var(--row-border); }
@@ -119,14 +152,36 @@
 
   <div class="field">
     <label><span data-i18n="startDate">Fecha de inicio</span> <span data-i18n="dateFormat">DD/MM/AAAA</span></label>
-    <input type="text" id="date1" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false">
+    <input type="text" id="date1" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false" inputmode="none">
     <div class="error" id="error1" data-i18n="invalidDate">Fecha no válida</div>
+    <div class="calendar-popup" id="cal1">
+      <div class="cal-head">
+        <button class="cal-prev" type="button">‹</button>
+        <div class="cal-selects">
+          <select class="cal-month"></select>
+          <select class="cal-year"></select>
+        </div>
+        <button class="cal-next" type="button">›</button>
+      </div>
+      <div class="cal-grid"></div>
+    </div>
   </div>
 
   <div class="field">
     <label><span data-i18n="endDate">Fecha de fin</span> <span data-i18n="dateFormat">DD/MM/AAAA</span></label>
-    <input type="text" id="date2" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false">
+    <input type="text" id="date2" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false" inputmode="none">
     <div class="error" id="error2" data-i18n="invalidDate">Fecha no válida</div>
+    <div class="calendar-popup" id="cal2">
+      <div class="cal-head">
+        <button class="cal-prev" type="button">‹</button>
+        <div class="cal-selects">
+          <select class="cal-month"></select>
+          <select class="cal-year"></select>
+        </div>
+        <button class="cal-next" type="button">›</button>
+      </div>
+      <div class="cal-grid"></div>
+    </div>
   </div>
 
   <div class="results">
@@ -286,11 +341,153 @@
   [date1El, date2El].forEach(el => el.addEventListener('input', calc));
   calc();
 
+  function setupCalendar(inputEl, popupEl) {
+    let viewDate = new Date();
+    let selectedDate = null;
+    let isOpen = false;
+
+    function render() {
+      const year = viewDate.getFullYear();
+      const month = viewDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const startOffset = (firstDay + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrev = new Date(year, month, 0).getDate();
+      const today = new Date();
+
+      const monthNames = [];
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(2000, i, 1);
+        monthNames.push(d.toLocaleDateString(getLocale(), { month: 'long' }));
+      }
+
+      const monthSel = popupEl.querySelector('.cal-month');
+      const yearSel = popupEl.querySelector('.cal-year');
+      monthSel.innerHTML = monthNames.map((name, i) =>
+        '<option value="' + i + '"' + (i === month ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'
+      ).join('');
+      if (monthSel.value !== String(month)) monthSel.value = month;
+
+      yearSel.innerHTML = '';
+      for (let y = year - 150; y <= year + 150; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        if (y === year) opt.selected = true;
+        yearSel.appendChild(opt);
+      }
+      if (yearSel.value !== String(year)) yearSel.value = year;
+
+      const weekdays = getLocale() === 'es-ES'
+        ? ['Lu','Ma','Mi','Ju','Vi','Sa','Do']
+        : ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+      let html = '<div class="cal-dow">' + weekdays.join('</div><div class="cal-dow">') + '</div>';
+
+      for (let i = startOffset - 1; i >= 0; i--) {
+        const day = daysInPrev - i;
+        const ym = new Date(year, month - 1);
+        html += '<div class="cal-day other" data-y="' + ym.getFullYear() + '" data-m="' + ym.getMonth() + '" data-d="' + day + '">' + day + '</div>';
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const cls = ['cal-day'];
+        if (selectedDate && day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) cls.push('selected');
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) cls.push('today');
+        html += '<div class="' + cls.join(' ') + '" data-y="' + year + '" data-m="' + month + '" data-d="' + day + '">' + day + '</div>';
+      }
+
+      const total = startOffset + daysInMonth;
+      const remaining = (7 - total % 7) % 7;
+      for (let day = 1; day <= remaining; day++) {
+        const ym = new Date(year, month + 1);
+        html += '<div class="cal-day other" data-y="' + ym.getFullYear() + '" data-m="' + ym.getMonth() + '" data-d="' + day + '">' + day + '</div>';
+      }
+
+      popupEl.querySelector('.cal-grid').innerHTML = html;
+
+      popupEl.querySelectorAll('.cal-day').forEach(el => {
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const y = parseInt(this.dataset.y);
+          const m = parseInt(this.dataset.m);
+          const d = parseInt(this.dataset.d);
+          const date = new Date(y, m, d);
+          inputEl.value = fmtDate(date);
+          selectedDate = date;
+          close();
+          inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+    }
+
+    function open() {
+      const parsed = parseDate(inputEl.value);
+      if (parsed) {
+        selectedDate = parsed;
+        viewDate = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+      } else {
+        selectedDate = null;
+        viewDate = new Date();
+        viewDate.setDate(1);
+      }
+      render();
+      popupEl.classList.add('open');
+      isOpen = true;
+    }
+
+    function close() {
+      popupEl.classList.remove('open');
+      isOpen = false;
+    }
+
+    inputEl.addEventListener('focus', function() {
+      document.querySelectorAll('.calendar-popup.open').forEach(p => {
+        if (p !== popupEl) p.classList.remove('open');
+      });
+      open();
+    });
+
+    popupEl.querySelector('.cal-prev').addEventListener('click', function(e) {
+      e.stopPropagation();
+      viewDate.setMonth(viewDate.getMonth() - 1);
+      render();
+    });
+
+    popupEl.querySelector('.cal-next').addEventListener('click', function(e) {
+      e.stopPropagation();
+      viewDate.setMonth(viewDate.getMonth() + 1);
+      render();
+    });
+
+    popupEl.querySelector('.cal-month').addEventListener('change', function(e) {
+      e.stopPropagation();
+      viewDate.setMonth(parseInt(this.value));
+      render();
+    });
+
+    popupEl.querySelector('.cal-year').addEventListener('change', function(e) {
+      e.stopPropagation();
+      viewDate.setFullYear(parseInt(this.value));
+      render();
+    });
+
+    document.addEventListener('click', function(e) {
+      if (isOpen && !popupEl.contains(e.target) && e.target !== inputEl) {
+        close();
+      }
+    });
+  }
+
+  setupCalendar(date1El, document.getElementById('cal1'));
+  setupCalendar(date2El, document.getElementById('cal2'));
+
   function applyLang() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.dataset.i18n);
     });
     langToggle.textContent = lang === 'es' ? 'EN' : 'ES';
+    document.querySelectorAll('.calendar-popup.open').forEach(p => p.classList.remove('open'));
     calc();
   }
 
