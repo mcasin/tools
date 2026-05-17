@@ -74,6 +74,13 @@
   }
   .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
   h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  .head-buttons { display: flex; gap: 8px; }
+  #langToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #langToggle:hover { opacity: .8; }
   #themeToggle {
     background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
     font-size: 20px; cursor: pointer; color: var(--toggle-color); transition: .2s;
@@ -122,17 +129,20 @@
 <body>
 <div class="card">
   <div class="head">
-    <h1>Simulador de Hipoteca</h1>
-    <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    <h1 data-i18n="title">Simulador de Hipoteca</h1>
+    <div class="head-buttons">
+      <button id="langToggle" aria-label="Cambiar idioma">ES</button>
+      <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    </div>
   </div>
 
   <div class="field">
-    <label>Precio de la vivienda</label>
+    <label data-i18n="housePrice">Precio de la vivienda</label>
     <input type="number" id="price" value="200000" step="10000" min="10000">
   </div>
 
   <div class="field">
-    <label>Financiación bancaria</label>
+    <label data-i18n="financing">Financiación bancaria</label>
     <div class="btn-group" id="financing">
       <button type="button" data-value="0.8" class="active">80%</button>
       <button type="button" data-value="0.9">90%</button>
@@ -141,20 +151,20 @@
   </div>
 
   <div class="field">
-    <label>Plazo <span id="yearsLabel">30 años</span></label>
+    <label><span data-i18n="term">Plazo</span> <span id="yearsLabel">30 años</span></label>
     <input type="range" id="years" min="25" max="40" value="30" step="1">
-    <div class="range-labels"><span>25 años</span><span>40 años</span></div>
+    <div class="range-labels"><span data-i18n="termMin">25 años</span><span data-i18n="termMax">40 años</span></div>
   </div>
 
   <div class="field">
-    <label>Tipo de interés <span id="rateLabel">2.50%</span></label>
+    <label><span data-i18n="interestRate">Tipo de interés</span> <span id="rateLabel">2.50%</span></label>
     <input type="range" id="rate" min="1.65" max="3.70" value="2.5" step="0.05">
     <div class="range-labels"><span>1.65%</span><span>3.70%</span></div>
   </div>
 
   <div class="results">
     <div class="row highlight">
-      <span class="label">Cuota mensual</span>
+      <span class="label" data-i18n="monthlyPayment">Cuota mensual</span>
       <span class="value" id="monthly">--</span>
     </div>
     <div class="row">
@@ -166,25 +176,72 @@
       <span class="value" id="downPayment">--</span>
     </div>
     <div class="row">
-      <span class="label">Impuestos y gastos (~10%)</span>
+      <span class="label" data-i18n="taxesAndFees">Impuestos y gastos (~10%)</span>
       <span class="value" id="taxes">--</span>
     </div>
     <div class="row">
-      <span class="label">Total necesario al inicio</span>
+      <span class="label" data-i18n="totalUpfront">Total necesario al inicio</span>
       <span class="value" id="totalUpfront">--</span>
     </div>
     <div class="row">
-      <span class="label">Total pagado al banco</span>
+      <span class="label" data-i18n="totalPaid">Total pagado al banco</span>
       <span class="value" id="totalPaid">--</span>
     </div>
   </div>
 
-  <div class="disclaimer">
+  <div class="disclaimer" data-i18n="disclaimer">
     Simulación orientativa. Consulte con su entidad bancaria para una oferta vinculante.
   </div>
 </div>
 
 <script>
+  const i18n = {
+    es: {
+      title: 'Simulador de Hipoteca',
+      housePrice: 'Precio de la vivienda',
+      financing: 'Financiación bancaria',
+      term: 'Plazo',
+      termMin: '25 años',
+      termMax: '40 años',
+      interestRate: 'Tipo de interés',
+      monthlyPayment: 'Cuota mensual',
+      taxesAndFees: 'Impuestos y gastos (~10%)',
+      totalUpfront: 'Total necesario al inicio',
+      totalPaid: 'Total pagado al banco',
+      years: 'años',
+      loanLabel: 'Importe de la hipoteca',
+      downLabel: 'Entrada necesaria',
+      disclaimer: 'Simulación orientativa. Consulte con su entidad bancaria para una oferta vinculante.',
+    },
+    en: {
+      title: 'Mortgage Simulator',
+      housePrice: 'House Price',
+      financing: 'Loan-to-Value',
+      term: 'Term',
+      termMin: '25 years',
+      termMax: '40 years',
+      interestRate: 'Interest Rate',
+      monthlyPayment: 'Monthly Payment',
+      taxesAndFees: 'Taxes & Fees (~10%)',
+      totalUpfront: 'Total Upfront Needed',
+      totalPaid: 'Total Paid to Bank',
+      years: 'years',
+      loanLabel: 'Loan Amount',
+      downLabel: 'Down Payment',
+      disclaimer: 'Estimates for reference only. Consult your bank for a binding offer.',
+    },
+  };
+
+  let lang = localStorage.getItem('lang') || 'es';
+
+  function t(key) {
+    return (i18n[lang] && i18n[lang][key]) || i18n['es'][key] || key;
+  }
+
+  function getLocale() {
+    return lang === 'es' ? 'es-ES' : 'en-US';
+  }
+
   const priceEl = document.getElementById('price');
   const yearsEl = document.getElementById('years');
   const rateEl = document.getElementById('rate');
@@ -200,7 +257,7 @@
   let financePct = 0.8;
 
   function fmt(n) {
-    return n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    return n.toLocaleString(getLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
   }
 
   function calc() {
@@ -208,7 +265,7 @@
     const years = parseInt(yearsEl.value, 10);
     const rate = parseFloat(rateEl.value) / 100;
 
-    yearsLabel.textContent = years + ' años';
+    yearsLabel.textContent = years + ' ' + t('years');
     rateLabel.textContent = (rate * 100).toFixed(2) + '%';
 
     const loan = price * financePct;
@@ -226,8 +283,8 @@
 
     loanAmountEl.textContent = fmt(loan);
     downPaymentEl.textContent = fmt(down);
-    document.querySelector('.row .loan-label').textContent = 'Importe de la hipoteca (' + pctDisplay + '%)';
-    document.querySelector('.row .down-label').textContent = 'Entrada necesaria (' + (100 - pctDisplay) + '%)';
+    document.querySelector('.row .loan-label').textContent = t('loanLabel') + ' (' + pctDisplay + '%)';
+    document.querySelector('.row .down-label').textContent = t('downLabel') + ' (' + (100 - pctDisplay) + '%)';
     taxesEl.textContent = fmt(taxes);
     totalUpfrontEl.textContent = fmt(upfront);
     monthlyEl.textContent = fmt(monthly);
@@ -246,6 +303,21 @@
   [priceEl, yearsEl, rateEl].forEach(el => el.addEventListener('input', calc));
   calc();
 
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    langToggle.textContent = lang === 'es' ? 'EN' : 'ES';
+    calc();
+  }
+
+  const langToggle = document.getElementById('langToggle');
+  langToggle.addEventListener('click', () => {
+    lang = lang === 'es' ? 'en' : 'es';
+    localStorage.setItem('lang', lang);
+    applyLang();
+  });
+
   const themeToggle = document.getElementById('themeToggle');
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -260,6 +332,8 @@
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     setTheme('dark');
   }
+
+  applyLang();
 </script>
 </body>
 </html>

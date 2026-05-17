@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor de Unidades</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f1f5f9;
+    --card-bg: #fff;
+    --card-shadow: rgba(0,0,0,.08);
+    --text: #0f172a;
+    --label: #334155;
+    --label-span: #64748b;
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --input-focus-bg: #fff;
+    --btn-bg: #f8fafc;
+    --btn-text: #334155;
+    --btn-border: #e2e8f0;
+    --btn-hover: #93c5fd;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #e2e8f0;
+    --slider-thumb-border: #fff;
+    --range-label: #94a3b8;
+    --results-bg: #f8fafc;
+    --row-border: #e2e8f0;
+    --row-label: #64748b;
+    --row-value: #0f172a;
+    --positive: #16a34a;
+    --disclaimer: #94a3b8;
+    --toggle-bg: #e2e8f0;
+    --toggle-color: #64748b;
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-shadow: rgba(0,0,0,.4);
+    --text: #f1f5f9;
+    --label: #cbd5e1;
+    --label-span: #94a3b8;
+    --input-bg: #334155;
+    --input-border: #475569;
+    --input-focus-bg: #334155;
+    --btn-bg: #334155;
+    --btn-text: #cbd5e1;
+    --btn-border: #475569;
+    --btn-hover: #3b82f6;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #475569;
+    --slider-thumb-border: #1e293b;
+    --range-label: #64748b;
+    --results-bg: #0f172a;
+    --row-border: #334155;
+    --row-label: #94a3b8;
+    --row-value: #f1f5f9;
+    --positive: #4ade80;
+    --disclaimer: #64748b;
+    --toggle-bg: #334155;
+    --toggle-color: #f1f5f9;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
+    transition: background .3s;
+  }
+  .card {
+    background: var(--card-bg); border-radius: 20px; padding: 40px; max-width: 520px; width: 100%;
+    box-shadow: 0 4px 24px var(--card-shadow); transition: background .3s;
+  }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  .head-buttons { display: flex; gap: 8px; }
+  #langToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #langToggle:hover { opacity: .8; }
+  #themeToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 20px; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #themeToggle:hover { opacity: .8; }
+  .field { margin-bottom: 24px; }
+  label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
+  label span { font-weight: 400; color: var(--label-span); }
+  .btn-group { display: flex; gap: 8px; }
+  .btn-group button {
+    flex: 1; padding: 10px; font-size: 13px; font-weight: 600; border: 1.5px solid var(--btn-border); border-radius: 10px;
+    background: var(--btn-bg); color: var(--btn-text); cursor: pointer; transition: all .2s;
+  }
+  .btn-group button:hover { border-color: var(--btn-hover); }
+  .btn-group button.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .input-row { display: flex; gap: 12px; align-items: stretch; }
+  .input-row input[type="number"] {
+    flex: 1; padding: 12px 14px; font-size: 16px; border: 1.5px solid var(--input-border); border-radius: 10px;
+    background: var(--input-bg); transition: border-color .2s, background .3s; outline: none; color: var(--text); min-width: 0;
+  }
+  .input-row input[type="number"]:focus { border-color: var(--accent); background: var(--input-focus-bg); }
+  .input-row input[type="number"]::-webkit-inner-spin-button { opacity: .5; }
+  select {
+    padding: 12px 14px; font-size: 15px; border: 1.5px solid var(--input-border); border-radius: 10px;
+    background: var(--input-bg); transition: border-color .2s, background .3s; outline: none; color: var(--text);
+    cursor: pointer; font-family: inherit; min-width: 120px;
+  }
+  select:focus { border-color: var(--accent); background: var(--input-focus-bg); }
+  .results { background: var(--results-bg); border-radius: 12px; padding: 20px; margin-top: 28px; transition: background .3s; }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid var(--row-border); }
+  .row .label { color: var(--row-label); }
+  .row .value { font-weight: 600; color: var(--row-value); text-align: right; }
+  .row.highlight .value { color: var(--positive); font-size: 20px; }
+  .disclaimer { font-size: 12px; color: var(--disclaimer); margin-top: 16px; text-align: center; line-height: 1.5; }
+  @media (max-width: 500px) {
+    .card { padding: 24px; }
+    .btn-group { flex-wrap: wrap; }
+    .btn-group button { font-size: 12px; padding: 8px 6px; min-width: calc(50% - 4px); }
+    .input-row { flex-direction: column; }
+    select { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1 data-i18n="title">Conversor de Unidades</h1>
+    <div class="head-buttons">
+      <button id="langToggle" aria-label="Cambiar idioma">ES</button>
+      <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label data-i18n="category">Categoría</label>
+    <div class="btn-group" id="category">
+      <button type="button" data-cat="temp" class="active" data-i18n="catTemp">Temperatura</button>
+      <button type="button" data-cat="weight" data-i18n="catWeight">Peso</button>
+      <button type="button" data-cat="length" data-i18n="catLength">Longitud</button>
+      <button type="button" data-cat="volume" data-i18n="catVolume">Volumen</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label data-i18n="value">Valor</label>
+    <div class="input-row">
+      <input type="number" id="value" value="100" step="any">
+      <select id="unit"></select>
+    </div>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <div class="disclaimer" data-i18n="disclaimer">
+    Los resultados se redondean a 4 decimales como máximo.
+  </div>
+</div>
+
+<script>
+  const i18n = {
+    es: {
+      title: 'Conversor de Unidades',
+      category: 'Categoría',
+      catTemp: 'Temperatura',
+      catWeight: 'Peso',
+      catLength: 'Longitud',
+      catVolume: 'Volumen',
+      value: 'Valor',
+      numError: 'Introduzca un valor numérico',
+      disclaimer: 'Los resultados se redondean a 4 decimales como máximo.',
+      unitC: 'Celsius',
+      unitF: 'Fahrenheit',
+      unitK: 'Kelvin',
+      unitKg: 'Kilogramo',
+      unitG: 'Gramo',
+      unitLb: 'Libra',
+      unitOz: 'Onza',
+      unitSt: 'Stone',
+      unitKm: 'Kilómetro',
+      unitM: 'Metro',
+      unitCm: 'Centímetro',
+      unitMm: 'Milímetro',
+      unitMi: 'Milla',
+      unitYd: 'Yarda',
+      unitFt: 'Pie',
+      unitIn: 'Pulgada',
+      unitL: 'Litro',
+      unitMl: 'Mililitro',
+      unitM3: 'Metro cúbico',
+      unitGal: 'Galón',
+      unitQt: 'Cuarto',
+      unitCup: 'Taza',
+      unitFloz: 'Onza líquida',
+    },
+    en: {
+      title: 'Unit Converter',
+      category: 'Category',
+      catTemp: 'Temperature',
+      catWeight: 'Weight',
+      catLength: 'Length',
+      catVolume: 'Volume',
+      value: 'Value',
+      numError: 'Enter a numeric value',
+      disclaimer: 'Results are rounded to 4 decimal places maximum.',
+      unitC: 'Celsius',
+      unitF: 'Fahrenheit',
+      unitK: 'Kelvin',
+      unitKg: 'Kilogram',
+      unitG: 'Gram',
+      unitLb: 'Pound',
+      unitOz: 'Ounce',
+      unitSt: 'Stone',
+      unitKm: 'Kilometer',
+      unitM: 'Meter',
+      unitCm: 'Centimeter',
+      unitMm: 'Millimeter',
+      unitMi: 'Mile',
+      unitYd: 'Yard',
+      unitFt: 'Foot',
+      unitIn: 'Inch',
+      unitL: 'Liter',
+      unitMl: 'Milliliter',
+      unitM3: 'Cubic meter',
+      unitGal: 'Gallon',
+      unitQt: 'Quart',
+      unitCup: 'Cup',
+      unitFloz: 'Fluid ounce',
+    },
+  };
+
+  let lang = localStorage.getItem('lang') || 'es';
+
+  function t(key) {
+    return (i18n[lang] && i18n[lang][key]) || i18n['es'][key] || key;
+  }
+
+  function getLocale() {
+    return lang === 'es' ? 'es-ES' : 'en-US';
+  }
+
+  const catBtns = document.querySelectorAll('#category button');
+  const valueEl = document.getElementById('value');
+  const unitEl = document.getElementById('unit');
+  const resultsEl = document.getElementById('results');
+
+  const units = {
+    temp: {
+      nameKey: 'catTemp',
+      list: [
+        { id: 'C', labelKey: 'unitC', base: v => v, from: v => v },
+        { id: 'F', labelKey: 'unitF', base: v => (v - 32) * 5 / 9, from: v => v * 9 / 5 + 32 },
+        { id: 'K', labelKey: 'unitK', base: v => v - 273.15, from: v => v + 273.15 },
+      ],
+    },
+    weight: {
+      nameKey: 'catWeight',
+      list: [
+        { id: 'kg', labelKey: 'unitKg', base: v => v, from: v => v },
+        { id: 'g', labelKey: 'unitG', base: v => v / 1000, from: v => v * 1000 },
+        { id: 'lb', labelKey: 'unitLb', base: v => v * 0.453592, from: v => v / 0.453592 },
+        { id: 'oz', labelKey: 'unitOz', base: v => v * 0.0283495, from: v => v / 0.0283495 },
+        { id: 'st', labelKey: 'unitSt', base: v => v * 6.35029, from: v => v / 6.35029 },
+      ],
+    },
+    length: {
+      nameKey: 'catLength',
+      list: [
+        { id: 'km', labelKey: 'unitKm', base: v => v * 1000, from: v => v / 1000 },
+        { id: 'm', labelKey: 'unitM', base: v => v, from: v => v },
+        { id: 'cm', labelKey: 'unitCm', base: v => v / 100, from: v => v * 100 },
+        { id: 'mm', labelKey: 'unitMm', base: v => v / 1000, from: v => v * 1000 },
+        { id: 'mi', labelKey: 'unitMi', base: v => v * 1609.34, from: v => v / 1609.34 },
+        { id: 'yd', labelKey: 'unitYd', base: v => v * 0.9144, from: v => v / 0.9144 },
+        { id: 'ft', labelKey: 'unitFt', base: v => v * 0.3048, from: v => v / 0.3048 },
+        { id: 'in', labelKey: 'unitIn', base: v => v * 0.0254, from: v => v / 0.0254 },
+      ],
+    },
+    volume: {
+      nameKey: 'catVolume',
+      list: [
+        { id: 'L', labelKey: 'unitL', base: v => v, from: v => v },
+        { id: 'mL', labelKey: 'unitMl', base: v => v / 1000, from: v => v * 1000 },
+        { id: 'm3', labelKey: 'unitM3', base: v => v * 1000, from: v => v / 1000 },
+        { id: 'gal', labelKey: 'unitGal', base: v => v * 3.78541, from: v => v / 3.78541 },
+        { id: 'qt', labelKey: 'unitQt', base: v => v * 0.946353, from: v => v / 0.946353 },
+        { id: 'cup', labelKey: 'unitCup', base: v => v * 0.236588, from: v => v / 0.236588 },
+        { id: 'floz', labelKey: 'unitFloz', base: v => v * 0.0295735, from: v => v / 0.0295735 },
+      ],
+    },
+  };
+
+  let currentCat = 'temp';
+
+  function populateUnits() {
+    const cat = units[currentCat];
+    unitEl.innerHTML = cat.list.map(u => '<option value="' + u.id + '">' + t(u.labelKey) + '</option>').join('');
+  }
+
+  function fmt(v) {
+    if (v === Infinity || isNaN(v)) return '--';
+    const s = v.toFixed(4);
+    const trimmed = parseFloat(s);
+    return trimmed.toLocaleString(getLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 4 });
+  }
+
+  function calc() {
+    const val = parseFloat(valueEl.value);
+    if (isNaN(val)) {
+      resultsEl.innerHTML = '<div class="row"><span class="label">' + t('numError') + '</span></div>';
+      return;
+    }
+
+    const cat = units[currentCat];
+    const fromUnit = cat.list.find(u => u.id === unitEl.value);
+    if (!fromUnit) return;
+
+    const baseVal = fromUnit.base(val);
+
+    const rows = cat.list.map(u => {
+      const converted = u.from(baseVal);
+      const isSource = u.id === fromUnit.id;
+      const cls = isSource ? 'highlight' : '';
+      return '<div class="row' + (cls ? ' ' + cls : '') + '">' +
+        '<span class="label">' + t(u.labelKey) + '</span>' +
+        '<span class="value">' + fmt(converted) + '</span>' +
+        '</div>';
+    });
+
+    resultsEl.innerHTML = rows.join('');
+  }
+
+  catBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      catBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCat = btn.dataset.cat;
+      populateUnits();
+      calc();
+    });
+  });
+
+  unitEl.addEventListener('change', calc);
+  valueEl.addEventListener('input', calc);
+
+  populateUnits();
+  calc();
+
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    langToggle.textContent = lang === 'es' ? 'EN' : 'ES';
+    populateUnits();
+    calc();
+  }
+
+  const langToggle = document.getElementById('langToggle');
+  langToggle.addEventListener('click', () => {
+    lang = lang === 'es' ? 'en' : 'es';
+    localStorage.setItem('lang', lang);
+    applyLang();
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', theme);
+  }
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  });
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    setTheme('dark');
+  }
+
+  applyLang();
+</script>
+</body>
+</html>

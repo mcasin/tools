@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diferencia entre Fechas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f1f5f9;
+    --card-bg: #fff;
+    --card-shadow: rgba(0,0,0,.08);
+    --text: #0f172a;
+    --label: #334155;
+    --label-span: #64748b;
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --input-focus-bg: #fff;
+    --btn-bg: #f8fafc;
+    --btn-text: #334155;
+    --btn-border: #e2e8f0;
+    --btn-hover: #93c5fd;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #e2e8f0;
+    --slider-thumb-border: #fff;
+    --range-label: #94a3b8;
+    --results-bg: #f8fafc;
+    --row-border: #e2e8f0;
+    --row-label: #64748b;
+    --row-value: #0f172a;
+    --positive: #16a34a;
+    --disclaimer: #94a3b8;
+    --toggle-bg: #e2e8f0;
+    --toggle-color: #64748b;
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --card-shadow: rgba(0,0,0,.4);
+    --text: #f1f5f9;
+    --label: #cbd5e1;
+    --label-span: #94a3b8;
+    --input-bg: #334155;
+    --input-border: #475569;
+    --input-focus-bg: #334155;
+    --btn-bg: #334155;
+    --btn-text: #cbd5e1;
+    --btn-border: #475569;
+    --btn-hover: #3b82f6;
+    --accent: #3b82f6;
+    --accent-text: #fff;
+    --slider-track: #475569;
+    --slider-thumb-border: #1e293b;
+    --range-label: #64748b;
+    --results-bg: #0f172a;
+    --row-border: #334155;
+    --row-label: #94a3b8;
+    --row-value: #f1f5f9;
+    --positive: #4ade80;
+    --disclaimer: #64748b;
+    --toggle-bg: #334155;
+    --toggle-color: #f1f5f9;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;
+    transition: background .3s;
+  }
+  .card {
+    background: var(--card-bg); border-radius: 20px; padding: 40px; max-width: 520px; width: 100%;
+    box-shadow: 0 4px 24px var(--card-shadow); transition: background .3s;
+  }
+  .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  .head-buttons { display: flex; gap: 8px; }
+  #langToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #langToggle:hover { opacity: .8; }
+  #themeToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 20px; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #themeToggle:hover { opacity: .8; }
+  .field { margin-bottom: 24px; }
+  label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
+  label span { font-weight: 400; color: var(--label-span); }
+  input[type="text"] {
+    width: 100%; padding: 12px 14px; font-size: 16px; border: 1.5px solid var(--input-border); border-radius: 10px;
+    background: var(--input-bg); transition: border-color .2s, background .3s; outline: none; color: var(--text);
+    font-family: inherit;
+  }
+  input[type="text"]:focus { border-color: var(--accent); background: var(--input-focus-bg); }
+  .error { color: #ef4444; font-size: 13px; margin-top: 4px; display: none; }
+  .results { background: var(--results-bg); border-radius: 12px; padding: 20px; margin-top: 28px; transition: background .3s; }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid var(--row-border); }
+  .row .label { color: var(--row-label); }
+  .row .value { font-weight: 600; color: var(--row-value); text-align: right; }
+  .row.highlight .value { color: var(--positive); font-size: 20px; }
+  .disclaimer { font-size: 12px; color: var(--disclaimer); margin-top: 16px; text-align: center; line-height: 1.5; }
+  @media (max-width: 480px) { .card { padding: 24px; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1 data-i18n="title">Diferencia entre Fechas</h1>
+    <div class="head-buttons">
+      <button id="langToggle" aria-label="Cambiar idioma">ES</button>
+      <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label><span data-i18n="startDate">Fecha de inicio</span> <span data-i18n="dateFormat">DD/MM/AAAA</span></label>
+    <input type="text" id="date1" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false">
+    <div class="error" id="error1" data-i18n="invalidDate">Fecha no válida</div>
+  </div>
+
+  <div class="field">
+    <label><span data-i18n="endDate">Fecha de fin</span> <span data-i18n="dateFormat">DD/MM/AAAA</span></label>
+    <input type="text" id="date2" placeholder="DD/MM/AAAA" autocomplete="off" spellcheck="false">
+    <div class="error" id="error2" data-i18n="invalidDate">Fecha no válida</div>
+  </div>
+
+  <div class="results">
+    <div class="row highlight">
+      <span class="label" data-i18n="diffDays">Días de diferencia</span>
+      <span class="value" id="diffDays">--</span>
+    </div>
+    <div class="row">
+      <span class="label" data-i18n="diffMonths">Meses de diferencia</span>
+      <span class="value" id="diffMonths">--</span>
+    </div>
+    <div class="row">
+      <span class="label" data-i18n="diffYears">Años de diferencia</span>
+      <span class="value" id="diffYears">--</span>
+    </div>
+    <div class="row">
+      <span class="label" data-i18n="dayOfWeekStart">Día de la semana (inicio)</span>
+      <span class="value" id="dayOfWeek1">--</span>
+    </div>
+    <div class="row">
+      <span class="label" data-i18n="dayOfWeekEnd">Día de la semana (fin)</span>
+      <span class="value" id="dayOfWeek2">--</span>
+    </div>
+  </div>
+
+  <div class="disclaimer" data-i18n="disclaimer">
+    Todos los cálculos tienen en cuenta años bisiestos.
+  </div>
+</div>
+
+<script>
+  const i18n = {
+    es: {
+      title: 'Diferencia entre Fechas',
+      startDate: 'Fecha de inicio',
+      endDate: 'Fecha de fin',
+      dateFormat: 'DD/MM/AAAA',
+      invalidDate: 'Fecha no válida',
+      diffDays: 'Días de diferencia',
+      diffMonths: 'Meses de diferencia',
+      diffYears: 'Años de diferencia',
+      dayOfWeekStart: 'Día de la semana (inicio)',
+      dayOfWeekEnd: 'Día de la semana (fin)',
+      disclaimer: 'Todos los cálculos tienen en cuenta años bisiestos.',
+      yearsAbbr: 'a',
+      monthsAbbr: 'm',
+      daysAbbr: 'd',
+    },
+    en: {
+      title: 'Date Difference',
+      startDate: 'Start Date',
+      endDate: 'End Date',
+      dateFormat: 'DD/MM/YYYY',
+      invalidDate: 'Invalid date',
+      diffDays: 'Days Difference',
+      diffMonths: 'Months Difference',
+      diffYears: 'Years Difference',
+      dayOfWeekStart: 'Day of Week (Start)',
+      dayOfWeekEnd: 'Day of Week (End)',
+      disclaimer: 'All calculations account for leap years.',
+      yearsAbbr: 'y',
+      monthsAbbr: 'm',
+      daysAbbr: 'd',
+    },
+  };
+
+  let lang = localStorage.getItem('lang') || 'es';
+
+  function t(key) {
+    return (i18n[lang] && i18n[lang][key]) || i18n['es'][key] || key;
+  }
+
+  function getLocale() {
+    return lang === 'es' ? 'es-ES' : 'en-US';
+  }
+
+  const date1El = document.getElementById('date1');
+  const date2El = document.getElementById('date2');
+  const error1 = document.getElementById('error1');
+  const error2 = document.getElementById('error2');
+  const diffDays = document.getElementById('diffDays');
+  const diffMonths = document.getElementById('diffMonths');
+  const diffYears = document.getElementById('diffYears');
+  const dayOfWeek1 = document.getElementById('dayOfWeek1');
+  const dayOfWeek2 = document.getElementById('dayOfWeek2');
+
+  function parseDate(str) {
+    const m = str.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    if (d.getDate() !== +m[1] || d.getMonth() !== +m[2] - 1) return null;
+    return d;
+  }
+
+  function fmtDate(d) {
+    return String(d.getDate()).padStart(2, '0') + '/' +
+           String(d.getMonth() + 1).padStart(2, '0') + '/' +
+           d.getFullYear();
+  }
+
+  function calc() {
+    const d1 = parseDate(date1El.value);
+    const d2 = parseDate(date2El.value);
+
+    if (!d1) { error1.style.display = 'block'; date1El.style.borderColor = '#ef4444'; }
+    else { error1.style.display = 'none'; date1El.style.borderColor = ''; }
+    if (!d2) { error2.style.display = 'block'; date2El.style.borderColor = '#ef4444'; }
+    else { error2.style.display = 'none'; date2El.style.borderColor = ''; }
+
+    if (!d1 || !d2) {
+      diffDays.textContent = '--';
+      diffMonths.textContent = '--';
+      diffYears.textContent = '--';
+      dayOfWeek1.textContent = '--';
+      dayOfWeek2.textContent = '--';
+      return;
+    }
+
+    const ms = Math.abs(d2 - d1);
+    const days = Math.round(ms / (1000 * 60 * 60 * 24));
+
+    const start = new Date(Math.min(d1, d2));
+    const end = new Date(Math.max(d1, d2));
+
+    let y = end.getFullYear() - start.getFullYear();
+    let m = end.getMonth() - start.getMonth();
+    let d = end.getDate() - start.getDate();
+
+    if (d < 0) {
+      m--;
+      const prev = new Date(end.getFullYear(), end.getMonth(), 0);
+      d += prev.getDate();
+    }
+    if (m < 0) {
+      y--;
+      m += 12;
+    }
+
+    const totalMonths = y * 12 + m;
+    const opts = { weekday: 'long' };
+    const dow1 = d1.toLocaleDateString(getLocale(), opts);
+    const dow2 = d2.toLocaleDateString(getLocale(), opts);
+
+    diffDays.textContent = days.toLocaleString(getLocale());
+    diffMonths.textContent = totalMonths.toLocaleString(getLocale());
+    diffYears.textContent = y + t('yearsAbbr') + ' ' + m + t('monthsAbbr') + ' ' + d + t('daysAbbr');
+    dayOfWeek1.textContent = dow1.charAt(0).toUpperCase() + dow1.slice(1);
+    dayOfWeek2.textContent = dow2.charAt(0).toUpperCase() + dow2.slice(1);
+  }
+
+  const today = new Date();
+  const past = new Date(today);
+  past.setDate(today.getDate() - 90);
+  date1El.value = fmtDate(past);
+  date2El.value = fmtDate(today);
+
+  [date1El, date2El].forEach(el => el.addEventListener('input', calc));
+  calc();
+
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    langToggle.textContent = lang === 'es' ? 'EN' : 'ES';
+    calc();
+  }
+
+  const langToggle = document.getElementById('langToggle');
+  langToggle.addEventListener('click', () => {
+    lang = lang === 'es' ? 'en' : 'es';
+    localStorage.setItem('lang', lang);
+    applyLang();
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', theme);
+  }
+  themeToggle.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+  });
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    setTheme('dark');
+  }
+
+  applyLang();
+</script>
+</body>
+</html>

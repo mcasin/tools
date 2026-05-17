@@ -74,6 +74,13 @@
   }
   .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
   h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  .head-buttons { display: flex; gap: 8px; }
+  #langToggle {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: var(--toggle-color); transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #langToggle:hover { opacity: .8; }
   #themeToggle {
     background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
     font-size: 20px; cursor: pointer; color: var(--toggle-color); transition: .2s;
@@ -126,50 +133,53 @@
 <body>
 <div class="card">
   <div class="head">
-    <h1>Calculadora de Red</h1>
-    <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    <h1 data-i18n="title">Calculadora de Red</h1>
+    <div class="head-buttons">
+      <button id="langToggle" aria-label="Cambiar idioma">ES</button>
+      <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
+    </div>
   </div>
 
   <div class="field">
-    <label>Dirección IP</label>
+    <label data-i18n="ipAddress">Dirección IP</label>
     <input type="text" id="ipAddress" value="192.168.1.0" placeholder="ej. 192.168.1.0" autocomplete="off" spellcheck="false">
-    <div class="error" id="ipError">Dirección IP no válida</div>
+    <div class="error" id="ipError" data-i18n="invalidIp">Dirección IP no válida</div>
   </div>
 
   <div class="field">
-    <label>Prefijo CIDR <span><input type="number" id="prefixInput" min="8" max="32" value="24"> <span id="prefixLabel">/24</span></span></label>
+    <label><span data-i18n="cidrPrefix">Prefijo CIDR</span> <span><input type="number" id="prefixInput" min="8" max="32" value="24"> <span id="prefixLabel">/24</span></span></label>
     <input type="range" id="prefix" min="8" max="32" value="24" step="1">
     <div class="range-labels"><span>/8</span><span>/32</span></div>
   </div>
 
   <div class="field">
-    <label>Máscara de subred <span id="maskLabel">255.255.255.0</span></label>
+    <label><span data-i18n="subnetMask">Máscara de subred</span> <span id="maskLabel">255.255.255.0</span></label>
   </div>
 
   <div class="results">
     <div class="row">
-      <span class="label">Dirección de red</span>
+      <span class="label" data-i18n="networkAddr">Dirección de red</span>
       <span class="value" id="networkAddr">--</span>
     </div>
     <div class="row">
-      <span class="label">Primer host utilizable</span>
+      <span class="label" data-i18n="firstHost">Primer host utilizable</span>
       <span class="value" id="firstHost">--</span>
     </div>
     <div class="row">
-      <span class="label">Último host utilizable</span>
+      <span class="label" data-i18n="lastHost">Último host utilizable</span>
       <span class="value" id="lastHost">--</span>
     </div>
     <div class="row">
-      <span class="label">Dirección de broadcast</span>
+      <span class="label" data-i18n="broadcastAddr">Dirección de broadcast</span>
       <span class="value" id="broadcastAddr">--</span>
     </div>
     <div class="row highlight">
-      <span class="label">Hosts utilizables</span>
+      <span class="label" data-i18n="usableHosts">Hosts utilizables</span>
       <span class="value" id="usableHosts">--</span>
     </div>
   </div>
 
-  <div class="disclaimer">
+  <div class="disclaimer" data-i18n-html="disclaimer">
     <strong>Rangos privados (RFC 1918):</strong> 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 &nbsp;|&nbsp;
     <strong>Loopback:</strong> 127.0.0.0/8 &nbsp;|&nbsp;
     <strong>Link-local:</strong> 169.254.0.0/16<br>
@@ -178,6 +188,45 @@
 </div>
 
 <script>
+  const i18n = {
+    es: {
+      title: 'Calculadora de Red',
+      ipAddress: 'Dirección IP',
+      invalidIp: 'Dirección IP no válida',
+      cidrPrefix: 'Prefijo CIDR',
+      subnetMask: 'Máscara de subred',
+      networkAddr: 'Dirección de red',
+      firstHost: 'Primer host utilizable',
+      lastHost: 'Último host utilizable',
+      broadcastAddr: 'Dirección de broadcast',
+      usableHosts: 'Hosts utilizables',
+      disclaimer: '<strong>Rangos privados (RFC 1918):</strong> 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 &nbsp;|&nbsp; <strong>Loopback:</strong> 127.0.0.0/8 &nbsp;|&nbsp; <strong>Link-local:</strong> 169.254.0.0/16<br>Las direcciones públicas son el resto y son enrutables en Internet.',
+    },
+    en: {
+      title: 'Network Calculator',
+      ipAddress: 'IP Address',
+      invalidIp: 'Invalid IP Address',
+      cidrPrefix: 'CIDR Prefix',
+      subnetMask: 'Subnet Mask',
+      networkAddr: 'Network Address',
+      firstHost: 'First Usable Host',
+      lastHost: 'Last Usable Host',
+      broadcastAddr: 'Broadcast Address',
+      usableHosts: 'Usable Hosts',
+      disclaimer: '<strong>Private ranges (RFC 1918):</strong> 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 &nbsp;|&nbsp; <strong>Loopback:</strong> 127.0.0.0/8 &nbsp;|&nbsp; <strong>Link-local:</strong> 169.254.0.0/16<br>Public addresses are the rest and are routable on the Internet.',
+    },
+  };
+
+  let lang = localStorage.getItem('lang') || 'es';
+
+  function t(key) {
+    return (i18n[lang] && i18n[lang][key]) || i18n['es'][key] || key;
+  }
+
+  function getLocale() {
+    return lang === 'es' ? 'es-ES' : 'en-US';
+  }
+
   const ipEl = document.getElementById('ipAddress');
   const prefixEl = document.getElementById('prefix');
   const prefixInput = document.getElementById('prefixInput');
@@ -215,7 +264,7 @@
   }
 
   function fmtHostCount(n) {
-    return n.toLocaleString('es-ES');
+    return n.toLocaleString(getLocale());
   }
 
   function calc() {
@@ -275,6 +324,24 @@
   [ipEl, prefixEl].forEach(el => el.addEventListener('input', calc));
   calc();
 
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      el.innerHTML = t(el.dataset.i18nHtml);
+    });
+    langToggle.textContent = lang === 'es' ? 'EN' : 'ES';
+    calc();
+  }
+
+  const langToggle = document.getElementById('langToggle');
+  langToggle.addEventListener('click', () => {
+    lang = lang === 'es' ? 'en' : 'es';
+    localStorage.setItem('lang', lang);
+    applyLang();
+  });
+
   const themeToggle = document.getElementById('themeToggle');
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -289,6 +356,8 @@
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     setTheme('dark');
   }
+
+  applyLang();
 </script>
 </body>
 </html>
