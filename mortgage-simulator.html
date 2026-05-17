@@ -87,6 +87,14 @@
     display: flex; align-items: center; justify-content: center;
   }
   #themeToggle:hover { opacity: .8; }
+  .head-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .head-left h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .back-btn {
+    background: var(--toggle-bg); border: none; border-radius: 10px; width: 36px; height: 36px;
+    font-size: 16px; cursor: pointer; color: var(--toggle-color); transition: .2s; text-decoration: none;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .back-btn:hover { opacity: .8; }
   .field { margin-bottom: 24px; }
   label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--label); margin-bottom: 6px; }
   label span { font-weight: 400; color: var(--label-span); }
@@ -129,7 +137,10 @@
 <body>
 <div class="card">
   <div class="head">
-    <h1 data-i18n="title">Simulador de Hipoteca</h1>
+    <div class="head-left">
+      <a class="back-btn" href="index.html" aria-label="Volver">←</a>
+      <h1 data-i18n="title">Simulador de Hipoteca</h1>
+    </div>
     <div class="head-buttons">
       <button id="langToggle" aria-label="Cambiar idioma">ES</button>
       <button id="themeToggle" aria-label="Cambiar tema">🌙</button>

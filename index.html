@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tools</title>
+<title>Marc Casin - Tools</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -73,7 +73,11 @@
     box-shadow: 0 4px 24px var(--card-shadow); transition: background .3s;
   }
   .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-  h1 { font-size: 24px; font-weight: 700; color: var(--text); margin: 0; }
+  .brand { flex: 1; text-decoration: none; transition: opacity .2s; }
+  .brand:hover { opacity: .8; }
+  .brand-name { font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: 3px; text-transform: uppercase; }
+  .brand-name .highlight { color: var(--accent); }
+  .brand-sub { font-size: 9px; color: var(--label-span); letter-spacing: 3px; text-transform: uppercase; margin-top: 1px; }
   .head-buttons { display: flex; gap: 8px; }
   #langToggle {
     background: var(--toggle-bg); border: none; border-radius: 10px; width: 40px; height: 40px;
@@ -111,7 +115,10 @@
 <body>
 <div class="card">
   <div class="head">
-    <h1 data-i18n="title">Tools</h1>
+    <a class="brand" href="https://mcasin.cloud" target="_blank" rel="noopener">
+      <div class="brand-name">MARC <span class="highlight">CASIN</span></div>
+      <div class="brand-sub">Cloud Architect</div>
+    </a>
     <div class="head-buttons">
       <button id="langToggle" aria-label="Cambiar idioma">ES</button>
       <button id="themeToggle" aria-label="Cambiar tema">🌙</button>
@@ -161,7 +168,6 @@
 <script>
   const i18n = {
     es: {
-      title: 'Tools',
       mortgageName: 'Simulador de Hipoteca',
       mortgageDesc: 'Calcula cuota mensual, entrada, impuestos y coste total',
       netName: 'Calculadora de Red',
@@ -172,7 +178,6 @@
       unitDesc: 'Convierte temperatura, peso, longitud y volumen entre múltiples unidades',
     },
     en: {
-      title: 'Tools',
       mortgageName: 'Mortgage Simulator',
       mortgageDesc: 'Calculate monthly payment, down payment, taxes and total cost',
       netName: 'Network Calculator',
